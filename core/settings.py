@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     'users',
     'vehicle',
     'order',
+    'auction',
+    'bid',
 ]
 
 MIDDLEWARE = [

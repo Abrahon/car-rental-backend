@@ -22,4 +22,6 @@ urlpatterns = [
     path('api/', include('users.urls')),
     path('api/',include('vehicle.urls')),
     path('api/',include('order.urls')),
+    path('api/',include('auction.urls')),
+    path('api/',include('bid.urls')),
 ]
