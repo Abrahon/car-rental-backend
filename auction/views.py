@@ -11,9 +11,7 @@ from .enums import AuctionStatus
 from users.enums import RoleChoices
 
 
-# -----------------------------
 # Create Auction (Dealer Only)
-# -----------------------------
 class AuctionCreateView(generics.CreateAPIView):
     serializer_class = AuctionCreateUpdateSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -52,9 +50,8 @@ class AuctionCreateView(generics.CreateAPIView):
         }, status=status.HTTP_201_CREATED)
 
 
-# -----------------------------
+
 # List All Auctions (Public)
-# -----------------------------
 class AuctionListView(generics.ListAPIView):
     serializer_class = AuctionSerializer
     permission_classes = [permissions.AllowAny]
@@ -73,9 +70,8 @@ class AuctionListView(generics.ListAPIView):
         return Auction.objects.all()
 
 
-# -----------------------------
+
 # Auction Detail (Public)
-# -----------------------------
 class AuctionDetailView(generics.RetrieveAPIView):
     serializer_class = AuctionSerializer
     permission_classes = [permissions.AllowAny]
@@ -95,6 +91,7 @@ class AuctionDetailView(generics.RetrieveAPIView):
         return Auction.objects.all()
 
 
+# admin
 class AdminAuctionListView(generics.ListAPIView):
     serializer_class = AuctionSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -104,3 +101,23 @@ class AdminAuctionListView(generics.ListAPIView):
         if user.role != RoleChoices.SUPER_ADMIN:
             raise PermissionDenied("Only Super Admin can access this.")
         return Auction.objects.all()
+
+
+    
+
+# Cancel an auction (Super Admin Only)
+class AdminCancelAuctionView(generics.UpdateAPIView):
+    serializer_class = AuctionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Auction.objects.all()
+    lookup_field = 'id'
+
+    def patch(self, request, *args, **kwargs):
+        user = request.user
+        if user.role != RoleChoices.SUPER_ADMIN:
+            raise PermissionDenied("Only Super Admin can cancel auctions.")
+
+        auction = self.get_object()
+        auction.status = 'CANCELLED'
+        auction.save()
+        return Response({"message": "Auction cancelled successfully.", "auction": AuctionSerializer(auction).data})

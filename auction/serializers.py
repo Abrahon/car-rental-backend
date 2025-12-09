@@ -5,9 +5,9 @@ from users.serializers import UserSerializer
 from .enums import AuctionStatus
 
 
-# -----------------------------
+
 # Auction List / Detail Serializer
-# -----------------------------
+
 class AuctionSerializer(serializers.ModelSerializer):
     vehicle = VehicleSerializer(read_only=True)
     dealer = UserSerializer(read_only=True)
@@ -23,9 +23,9 @@ class AuctionSerializer(serializers.ModelSerializer):
         read_only_fields = ['current_price', 'status', 'created_at', 'updated_at']
 
 
-# -----------------------------
+
 # Auction Create / Update Serializer
-# -----------------------------
+
 class AuctionCreateUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:

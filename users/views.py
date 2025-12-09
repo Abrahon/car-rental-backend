@@ -95,36 +95,46 @@ class LoginView(generics.GenericAPIView):
 
 
 
-# -----------------------------
+
 # Dealer Approval (Super Admin Only)
-# -----------------------------
+
+from rest_framework import generics, status
+from rest_framework.response import Response
+from rest_framework.permissions import IsAdminUser
+from django.contrib.auth import get_user_model
+from .serializers import DealerApprovalSerializer
+from .enums import RoleChoices
+
+User = get_user_model()
+
 
 class DealerApprovalView(generics.UpdateAPIView):
     queryset = User.objects.filter(role=RoleChoices.DEALER)
     serializer_class = DealerApprovalSerializer
     permission_classes = [IsAdminUser]
+    lookup_field = "id"  # Must match URL parameter
 
     def patch(self, request, *args, **kwargs):
         dealer = self.get_object()
-        action = request.data.get("action")  # Expect "approve" or "deny"
+        action = request.data.get("action")  # "approve" or "deny"
 
         if action == "approve":
             dealer.is_approved = True
-            dealer.is_active = True  # Optional: make active
-            dealer.save()
+            dealer.is_active = True  # Optional: allow login after approval
             message = "Dealer approved successfully"
-
         elif action == "deny":
             dealer.is_approved = False
             dealer.is_active = False  # Optional: disable login
-            dealer.save()
             message = "Dealer denied successfully"
-
         else:
-            return Response({"error": "Invalid action. Use 'approve' or 'deny'."},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Invalid action. Use 'approve' or 'deny'."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
+        dealer.save()
         serializer = self.get_serializer(dealer)
+
         return Response({
             "status": message,
             "dealer": serializer.data

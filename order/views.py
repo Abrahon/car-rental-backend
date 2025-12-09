@@ -1,51 +1,4 @@
-# from rest_framework import generics, permissions, status
-# from rest_framework.response import Response
-# from rest_framework.exceptions import PermissionDenied
-# from django.shortcuts import get_object_or_404
 
-# from .models import Vehicle, Order
-# from .serializers import (
-#     OrderSerializer,
-#     PurchaseSerializer
-# )
-
-
-
-# # -----------------------------
-# # Purchase Vehicle (User Only)
-# # -----------------------------
-# class VehiclePurchaseView(generics.GenericAPIView):
-#     serializer_class = PurchaseSerializer
-#     permission_classes = [permissions.IsAuthenticated]
-
-#     def post(self, request, id, *args, **kwargs):
-#         user = request.user
-#         if user.role != 'USER':
-#             raise PermissionDenied("Only users can purchase vehicles.")
-
-#         serializer = self.get_serializer(data={'vehicle_id': id})
-#         serializer.is_valid(raise_exception=True)
-#         order = serializer.save()
-
-#         return Response({
-#             "message": "Vehicle purchased successfully",
-#             "order": OrderSerializer(order).data
-#         }, status=status.HTTP_201_CREATED)
-
-
-# # -----------------------------
-# # List User Orders
-# # -----------------------------
-# class OrderListView(generics.ListAPIView):
-#     serializer_class = OrderSerializer
-#     permission_classes = [permissions.IsAuthenticated]
-
-#     def get_queryset(self):
-#         user = self.request.user
-#         # Users can see their own orders, Admin can see all
-#         if user.role == 'USER':
-#             return Order.objects.filter(user=user)
-#         return Order.objects.all()
 
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
@@ -58,9 +11,9 @@ from .serializers import OrderSerializer, PurchaseSerializer
 from users.enums import RoleChoices
 
 
-# -----------------------------
+
 # Purchase Vehicle (User Only)
-# -----------------------------
+
 class VehiclePurchaseView(generics.GenericAPIView):
     serializer_class = PurchaseSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -83,9 +36,8 @@ class VehiclePurchaseView(generics.GenericAPIView):
         }, status=status.HTTP_201_CREATED)
 
 
-# -----------------------------
+
 # List Orders
-# -----------------------------
 class OrderListView(generics.ListAPIView):
     serializer_class = OrderSerializer
     permission_classes = [permissions.IsAuthenticated]

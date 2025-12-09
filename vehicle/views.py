@@ -12,21 +12,45 @@ from .enums import VehicleStatus
 from users.enums import RoleChoices
 
 
-# -----------------------------
+
 # Public Vehicle List
+# class VehicleListView(generics.ListAPIView):
+#     serializer_class = VehicleSerializer
+#     permission_classes = [permissions.AllowAny]
+
+#     def get_queryset(self):
+#         # Only show AVAILABLE vehicles publicly
+#         return Vehicle.objects.filter(status=VehicleStatus.AVAILABLE)
+
+from rest_framework import generics, permissions
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
+from .models import Vehicle
+from .serializers import VehicleSerializer
+from .enums import VehicleStatus
+
 # -----------------------------
+# Public Vehicle List with Search, Filter, Pagination
+
 class VehicleListView(generics.ListAPIView):
     serializer_class = VehicleSerializer
     permission_classes = [permissions.AllowAny]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ['make', 'model', 'year', 'price']
+    search_fields = ['title', 'description', 'make', 'model']
+    ordering_fields = ['price', 'year', 'created_at']
+    ordering = ['-created_at']
 
     def get_queryset(self):
-        # Only show AVAILABLE vehicles publicly
-        return Vehicle.objects.filter(status=VehicleStatus.AVAILABLE)
+        # Only show available vehicles where the dealer account is active
+        return Vehicle.objects.filter(
+            status=VehicleStatus.AVAILABLE,
+            dealer__is_active=True
+        )
 
 
-# -----------------------------
+
 # Public Vehicle Detail
-# -----------------------------
 class VehicleDetailView(generics.RetrieveAPIView):
     serializer_class = VehicleSerializer
     permission_classes = [permissions.AllowAny]
@@ -38,10 +62,7 @@ class VehicleDetailView(generics.RetrieveAPIView):
         return Vehicle.objects.exclude(status=VehicleStatus.PENDING_APPROVAL)
 
 
-# -----------------------------
 # Dealer Vehicle Create
-# -----------------------------
-
 class VehicleCreateView(generics.CreateAPIView):
     serializer_class = VehicleCreateUpdateSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -61,10 +82,8 @@ class VehicleCreateView(generics.CreateAPIView):
 
 
 
-# -----------------------------
-# Dealer Vehicle Update
-# -----------------------------
 
+# Dealer Vehicle Update
 
 class VehicleUpdateView(generics.UpdateAPIView):
     serializer_class = VehicleCreateUpdateSerializer
@@ -91,9 +110,8 @@ class VehicleUpdateView(generics.UpdateAPIView):
 
 
 
-# -----------------------------
+
 # Dealer Vehicle Delete
-# -----------------------------
 class VehicleDeleteView(generics.DestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
     lookup_field = 'id'
@@ -110,7 +128,7 @@ class VehicleDeleteView(generics.DestroyAPIView):
             raise PermissionDenied("Cannot delete a sold vehicle.")
         return super().perform_destroy(instance)
     
-
+# admin can see vehicle list
 class AdminVehicleListView(generics.ListAPIView):
     serializer_class = VehicleSerializer
     permission_classes = [permissions.IsAuthenticated]
