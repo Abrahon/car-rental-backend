@@ -5,6 +5,7 @@ from .views import (
     VehicleCreateView,
     VehicleUpdateView,
     VehicleDeleteView,
+    AdminVehicleListView
 )
 
 urlpatterns = [
@@ -16,4 +17,5 @@ urlpatterns = [
     path('dealer/create/', VehicleCreateView.as_view(), name='vehicle-create'),
     path('dealer/<int:id>/update/', VehicleUpdateView.as_view(), name='vehicle-update'),
     path('dealer/<int:id>/delete/', VehicleDeleteView.as_view(), name='vehicle-delete'),
+    path('api/admin/vehicles/',AdminVehicleListView.as_view(),name='vehicle-list'),
 ]

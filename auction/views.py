@@ -93,3 +93,14 @@ class AuctionDetailView(generics.RetrieveAPIView):
                 auction.save()
 
         return Auction.objects.all()
+
+
+class AdminAuctionListView(generics.ListAPIView):
+    serializer_class = AuctionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role != RoleChoices.SUPER_ADMIN:
+            raise PermissionDenied("Only Super Admin can access this.")
+        return Auction.objects.all()

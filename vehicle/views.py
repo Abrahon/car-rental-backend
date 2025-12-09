@@ -109,3 +109,14 @@ class VehicleDeleteView(generics.DestroyAPIView):
         if instance.status == VehicleStatus.SOLD:
             raise PermissionDenied("Cannot delete a sold vehicle.")
         return super().perform_destroy(instance)
+    
+
+class AdminVehicleListView(generics.ListAPIView):
+    serializer_class = VehicleSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role != RoleChoices.SUPER_ADMIN:
+            raise PermissionDenied("Only Super Admin can access this.")
+        return Vehicle.objects.all()

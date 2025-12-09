@@ -2,12 +2,15 @@
 
 from rest_framework import generics, status
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAdminUser
+from rest_framework.permissions import AllowAny, IsAdminUser,IsAuthenticated
 # from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
+from rest_framework.exceptions import PermissionDenied
 
-from .serializers import SignupSerializer, LoginSerializer, DealerApprovalSerializer
+
+
+from .serializers import SignupSerializer, LoginSerializer, DealerApprovalSerializer,UserSerializer
 
 from .enums import RoleChoices
 User = get_user_model()
@@ -127,3 +130,13 @@ class DealerApprovalView(generics.UpdateAPIView):
             "dealer": serializer.data
         }, status=status.HTTP_200_OK)
 
+
+class DealerListView(generics.ListAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role != RoleChoices.SUPER_ADMIN:
+            raise PermissionDenied("Only Super Admin can access this.")
+        return User.objects.filter(role=RoleChoices.DEALER)
